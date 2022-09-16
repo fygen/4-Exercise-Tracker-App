@@ -40,6 +40,7 @@ const userSchema = new Schema({
 })
 //We create the User Model by using mongoosejs library and we can make manipulations.
 let User = mongoose.model("User", userSchema);
+let Exercise = mongoose.model("Exercise", exerciseSchema);
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
@@ -93,7 +94,35 @@ app.get("/api/users", (req, res, next) => {
 })
 
 app.post("/api/users/:_id/exercises", (req, res, next) => {
-
+    console.log(req.params._id)
+    User.findById(req.params._id, (err, user) => {
+        if (err) {
+            console.log(err);
+            next("err");
+        };
+        if(!user){
+            next(user);
+        }
+        console.log("user availability:", user);
+        if (typeof user !== "undefined") {
+            let userName = user.username;
+            const userEx = new Exercise({
+                _id: req.params._id,
+                username: userName,
+                date: req.body.date !== "" ? req.body.date : null,
+                duration: req.body.duration,
+                description: req.body.description
+            })
+            userEx.save((err) => {
+                if (err) console.log(err)
+                next(err);
+            })
+            res.json(userEx);
+        }
+        else {
+            next("user is not created yet")
+        }
+    })
 })
 
 
