@@ -97,9 +97,10 @@ app.get("/api/users", (req, res, next) => {
 })
 
 app.post("/api/users/:_id/exercises", (req, res, next) => {
-    console.log(req.params._id, "req.body.date is:", req.body.date)
-    let dateFormat = typeof req.body.date === "undefined"? undefined :new Date(...req.body.date.split("-")).toDateString();
-    console.log(dateFormat);
+    console.log(req.params._id, "req.body.date is:", req.body.date, "req.body.date type: ", typeof req.body.date)
+    let toDBdate = /\d\d\d\d-\d\d-\d\d/.test(req.body.date) ? new Date(req.body.date.split("-")).toDateString() : new Date().toDateString();
+    // typeof req.body.date === "undefined" ? new Date(...req.body.date.split("-")).toDateString() : new Date().toDateString();
+    console.log(toDBdate);
     User.findById(req.params._id, (err, user) => {
         if (err) {
             console.log(err);
@@ -110,7 +111,7 @@ app.post("/api/users/:_id/exercises", (req, res, next) => {
         }
         console.log("user availability:", user);
         if (typeof user !== "undefined") {
-            let toDBdate = typeof req.body.date !== "undefined" ? dateFormat : new Date().toDateString();
+            // let toDBdate = req.body.date != null ? dateFormat : new Date().toDateString();
             let logid = user.count;
             user.log.push({
                 date: toDBdate,
@@ -132,10 +133,10 @@ app.post("/api/users/:_id/exercises", (req, res, next) => {
 
 app.get("/api/users/:_id/logs", (req, res, next) => {
     console.log("id:", req.params._id)
-    User.findById(req.params._id, "_id username count log.date log.duration log.description", (err, user)=>{
+    User.findById(req.params._id, "_id username count log.date log.duration log.description", (err, user) => {
         if (err) console.error(err)
         if (!user) next(user);
-        if (typeof user !== "undefined"){
+        if (typeof user !== "undefined") {
             res.json(user);
         }
     })
